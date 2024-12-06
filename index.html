@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار الأسئلة الاختيارية</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            direction: rtl;
+            text-align: right;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 50px;
+            font-size: 36px;
+        }
+
+        #quiz {
+            width: 80%;
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .question {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .option-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .option-button:hover {
+            background-color: #2980b9;
+        }
+
+        .option-button:active {
+            background-color: #1c5980;
+        }
+
+        .result {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .reset-button {
+            display: block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .reset-button:hover {
+            background-color: #2ecc71;
+        }
+
+        .feedback {
+            font-size: 18px;
+            margin-top: 15px;
+        }
+
+        .correct {
+            color: green;
+        }
+
+        .incorrect {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>اختبار الأسئلة الاختيارية</h1>
+
+    <div id="quiz">
+        <!-- الأسئلة ستُعرض هنا -->
+    </div>
+
+    <div id="result" class="result hidden">
+        نتيجتك: <span id="score"></span> من <span id="total"></span>
+        <br>
+        إجابات صحيحة: <span id="correctAnswers"></span>
+        <br>
+        إجابات خاطئة: <span id="incorrectAnswers"></span>
+        <button class="reset-button" onclick="resetQuiz()">إعادة الاختبار</button>
+    </div>
+
+    <script>
+        // قائمة الأسئلة
+        const questions = [
+            { question: "ما هو تعريف علم الفسيولوجيا؟", options: ["دراسة وظائف الأعضاء", "دراسة الأمراض", "دراسة البيئة", "دراسة الجينات"], correctAnswer: 0 },
+            { question: "ما هي وحدة الحياة الأساسية في الجسم؟", options: ["العضو", "الخلية", "النسيج", "الجهاز"], correctAnswer: 1 },
+            { question: "ما هو دور النواة في الخلية؟", options: ["توليد الطاقة", "التحكم في نشاط الخلية", "تخزين الماء", "هضم الغذاء"], correctAnswer: 1 },
+            { question: "ما هو مبدأ \"التكيف\" في التدريب الرياضي؟", options: ["زيادة شدة التمرين بشكل مستمر", "التكيف مع البيئة المحيطة فقط", "استجابة الجسم للتغيرات التي تحدث أثناء التمرين", "تغيير نوع التمرين أسبوعيًا"], correctAnswer: 2 },
+            { question: "ما هو الدور الرئيسي للعضلات الهيكلية؟", options: ["تخزين الطاقة", "تنظيم الجهاز العصبي", "مساعدة الحركة", "تنظيم تدفق الدم"], correctAnswer: 2 },
+            { question: "أي من الأنسجة التالية يحتوي على خلايا مستديرة وسميكة؟", options: ["الأنسجة العضلية", "الأنسجة العصبية", "الأنسجة الظهارية", "الأنسجة الضامة"], correctAnswer: 0 },
+            { question: "ما هو تأثير التمرين المكثف على مستوى الأوكسجين في الدم؟", options: ["يقلل من مستوى الأوكسجين", "لا يؤثر على مستوى الأوكسجين", "يزيد من مستوى الأوكسجين", "يعزز عملية التنفس فقط"], correctAnswer: 0 },
+            { question: "ما هو دور الخلايا العصبية في الجسم؟", options: ["تنظيم الجهاز العصبي", "التنسيق بين الأعضاء", "نقل الإشارات العصبية", "إنتاج الطاقة"], correctAnswer: 2 },
+            { question: "ما هو تأثير التدريب على حجم العضلات؟", options: ["زيادة حجم العضلات", "تقليل حجم العضلات", "تحفيز الخلايا العصبية", "تحسين أداء القلب فقط"], correctAnswer: 0 },
+            { question: "أي من المبادئ التالية يتعلق بتطوير اللياقة الشاملة؟", options: ["مبدأ التدرج", "مبدأ الانتظام", "مبدأ التنمية الشاملة", "مبدأ التكيف"], correctAnswer: 2 },
+            { question: "ما هو تعريف الجهاز العصبي المركزي؟", options: ["يتألف من المخ والنخاع الشوكي", "يتألف من الأعصاب الطرفية فقط", "يتألف من العضلات", "يتألف من الخلايا العصبية الحسية فقط"], correctAnswer: 0 },
+            { question: "ما هي وظيفة الجهاز العصبي السمبثاوي؟", options: ["تحفيز الجسم في حالات الطوارئ", "زيادة معدل الراحة", "تقليل معدل التنفس", "تحسين الدورة الدموية"], correctAnswer: 0 },
+            { question: "كيف تؤثر التمارين المنتظمة على الجهاز العصبي؟", options: ["تحسن سرعة رد الفعل", "تقلل من عدد الخلايا العصبية", "تضعف الإشارات العصبية", "تزيد التوتر"], correctAnswer: 0 },
+            
+            { question: "ما هو دور النخاع الشوكي؟", options: ["تنظيم ردود الفعل السريعة", "تحسين الدورة الدموية", "إدارة النشاط العقلي", "زيادة تدفق الأوكسجين"], correctAnswer: 0 },
+            
+{ question: "ما* هو العدد التقريبي للعضلات في جسم الإنسان؟", options: ["400 عضلة", "500 عضلة", "600 عضلة", "700 عضلة"], correctAnswer: 2 },
+{ question: "ما هي الأنواع الرئيسية للأنسجة العضلية؟", options: ["عضلات ناعمة، عضلات هيكلية، وعضلات قلبية", "عضلات إرادية وعضلات لا إرادية فقط", "عضلات داخلية وخارجية", "عضلات طويلة وقصيرة فقط"], correctAnswer: 0 },
+{ question: "أي من الخصائص التالية تميز العضلات الهيكلية؟", options: ["غير مخططة", "تعمل دون إرادة", "مخططة وتعمل بإرادة", "تتواجد فقط في الجهاز الهضمي"], correctAnswer: 2 },
+{ question: "ما هو الجهاز العصبي الذي يتحكم في العضلات الناعمة؟", options: ["الجهاز العصبي المركزي", "الجهاز العصبي السمبثاوي", "الجهاز العصبي اللا إرادي", "الجهاز العصبي الحركي"], correctAnswer: 2 },
+{ question: "أين توجد العضلات القلبية؟", options: ["في الذراعين", "في القلب فقط", "في الأوعية الدموية", "في جميع أنحاء الجسم"], correctAnswer: 1 },
+{ question: "ما هي الخاصية التي تميز العضلات القلبية عن غيرها؟", options: ["تعمل بشكل إرادي", "لها نواة واحدة فقط", "تعمل بإيقاع ذاتي", "تتحكم بها العضلات الهيكلية"], correctAnswer: 2 },
+{ question: "ما اسم الغشاء الذي يحيط بالليف العضلي؟", options: ["الساركوبلازم", "الساركوليما", "الميوفيبريل", "الميتوكندريا"], correctAnswer: 1 },
+{ question: "ما هي الوحدة الأساسية للعضلة الهيكلية؟", options: ["الميوسين", "الأكتين", "الساركومير", "الغشاء البلازمي"], correctAnswer: 2 },
+{ question: "ما هو دور الميتوكندريا في العضلة؟", options: ["تخزين الماء", "إنتاج الطاقة (ATP)", "نقل الإشارات العصبية", "بناء البروتينات"], correctAnswer: 1 },
+{ question: "ما هو التركيب الذي يخزن الكالسيوم داخل العضلة؟", options: ["النواة", "الرايبوسومات", "الشبكة الساركوبلازمية", "اللييف العضلي"], correctAnswer: 2 },
+{ question: "ما هو اسم البروتين المسؤول عن التقلص العضلي؟", options: ["الميوسين", "الأكتين", "التروبونين", "التروبوميوسين"], correctAnswer: 0 },
+{ question: "ما هو دور التروبونين في العضلة؟", options: ["تنظيم تقلص العضلة", "تخزين الكالسيوم", "إنتاج الطاقة", "تقوية الغشاء العضلي"], correctAnswer: 0 },
+{ question: "كيف يتم تحفيز العضلات الهيكلية؟", options: ["بواسطة الأكسجين", "عبر الأعصاب الحركية", "بواسطة العضلات القلبية", "عبر العضلات الناعمة"], correctAnswer: 1 },
+{ question: "ما هي الخاصية الفريدة للعضلة القلبية؟", options: ["تعمل تحت سيطرة الدماغ فقط", "تحتوي على ألياف طويلة فقط", "تعمل بإيقاع ذاتي دون تدخل", "تتقلص أسرع من العضلات الأخرى"], correctAnswer: 2 },
+{ question: "ما هو اسم الفجوة التي تحدث عند اتصال العضلات بالأعصاب؟", options: ["المشبك العصبي العضلي", "العقدة العصبية", "غشاء الخلية", "الأنسجة الضامة"], correctAnswer: 0 },
+{ question: "ما هي وظيفة الأنسجة الضامة المحيطة بالعضلات؟", options: ["تخزين الطاقة", "حماية الألياف العضلية ودعمها", "إنتاج البروتينات", "إرسال الإشارات العصبية"], correctAnswer: 1 },
+{ question: "أي من التالي يُعد من خصائص العضلات؟", options: ["القابلية للتمدد والانقباض", "القدرة على إفراز الهرمونات", "عدم التفاعل مع الأعصاب", "ثبات الشكل فقط"], correctAnswer: 0 },
+{ question: "ما هو البروتين الذي يساعد في استقرار العضلة أثناء الانقباض؟", options: ["التروبونين", "التيتين", "الأكتين", "الميوسين"], correctAnswer: 1 },
+{ question: "أي من التالي يُعتبر نوعًا من الانقباض العضلي؟", options: ["الانقباض المتساوي الطول", "الانقباض المتساوي الجهد", "الانقباض المرن فقط", "الانقباض القلبي فقط"], correctAnswer: 0 },
+{ question: "ما هي الخاصية التي تسمح للعضلة بالعودة إلى طولها الأصلي؟", options: ["المرونة", "القابلية للانقباض", "التمدد", "التوصيل العصبي"], correctAnswer: 0 },
+{ question: "كيف تؤثر التمارين على العضلات الهيكلية؟", options: ["تزيد من عدد الخلايا العصبية", "تزيد من حجم الألياف العضلية", "تقلل من تدفق الدم", "تقلل من مرونة العضلة"], correctAnswer: 1 },
+{ question: "ما هي مرحلة انقباض العضلة التي يتم خلالها استهلاك ATP؟", options: ["مرحلة الراحة", "مرحلة الانزلاق", "مرحلة الإطلاق", "مرحلة التثبيت"], correctAnswer: 1 },
+{ question: "ما اسم المنطقة داخل الساركومير التي تحتوي على الميوسين فقط؟", options: ["المنطقة H", "المنطقة A", "المنطقة Z", "المنطقة I"], correctAnswer: 0 },
+{ question: "كيف يتم إنتاج الطاقة اللازمة لتقلص العضلات؟", options: ["من خلال الجليكوجين فقط", "بواسطة الميتوكندريا", "عبر التروبونين", "من خلال الشبكة الساركوبلازمية"], correctAnswer: 1 },
+{ question: "ما هو الانقباض العضلي الذي يحدث دون تغيير في طول العضلة؟", options: ["الانقباض متساوي الطول", "الانقباض متساوي الجهد", "الانقباض الإيقاعي", "الانقباض الثابت"], correctAnswer: 3 },
+{ question: "ما هي الخاصية الرئيسية للعضلات الناعمة؟", options: ["تعمل بإرادة الإنسان", "توجد في الأعضاء الداخلية", "تحتوي على خطوط عرضية", "تتحكم في حركة الأطراف"], correctAnswer: 1 },
+{ question: "ما هو المصدر الرئيسي للطاقة في العضلات؟", options: ["الجلوكوز", "البروتين", "الدهون", "الفيتامينات"], correctAnswer: 0 },
+{ question: "ما هي البروتينات المسؤولة عن التقلص العضلي؟", options: ["الأكتين والميوسين", "التروبونين والتروبوميوسين", "التيتين والنيبولين", "الميوجلوبين والهيموجلوبين"], correctAnswer: 0 },
+{ question: "ما اسم العملية التي يتم فيها انزلاق خيوط الأكتين فوق الميوسين؟", options: ["دورة الجسور العرضية", "دورة التمدد", "دورة الاسترخاء", "دورة التوصيل"], correctAnswer: 0 },
+{ question: "أي من التالي يُعد من وظائف العضلات القلبية؟", options: ["ضخ الدم", "المساعدة في حركة الأطراف", "تنظيم الهضم", "تخزين الطاقة"], correctAnswer: 0 },
+{ question: "ما هي الألياف العضلية التي تتميز بسرعة الانقباض؟", options: ["الألياف البطيئة", "الألياف السريعة", "الألياف المتوسطة", "الألياف القلبية"], correctAnswer: 1 },
+{ question: "ما هي المادة التي تُخزن داخل العضلات لتوفير الطاقة السريعة؟", options: ["الكرياتين فوسفات", "الجليكوجين", "الدهون الثلاثية", "البروتين"], correctAnswer: 0 },
+
+
+
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let correctAnswers = 0;
+        let incorrectAnswers = 0;
+
+        function showQuestion() {
+            const question = questions[currentQuestion];
+            const quizContainer = document.getElementById('quiz');
+            quizContainer.innerHTML = '';
+
+            const questionElement = document.createElement('div');
+            questionElement.classList.add('question');
+            questionElement.textContent = question.question;
+            quizContainer.appendChild(questionElement);
+
+            const optionsElement = document.createElement('div');
+            optionsElement.classList.add('options');
+
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('button');
+                optionElement.textContent = option;
+                optionElement.classList.add('option-button');
+                optionElement.onclick = () => checkAnswer(index);
+                optionsElement.appendChild(optionElement);
+            });
+
+            quizContainer.appendChild(optionsElement);
+        }
+
+        function checkAnswer(selectedIndex) {
+            const question = questions[currentQuestion];
+            const quizContainer = document.getElementById('quiz');
+            const feedbackElement = document.createElement('div');
+            feedbackElement.classList.add('feedback');
+
+            if (selectedIndex === question.correctAnswer) {
+                score++;
+                correctAnswers++;
+                feedbackElement.textContent = "إجابة صحيحة!";
+                feedbackElement.classList.add('correct');
+            } else {
+                incorrectAnswers++;
+                feedbackElement.textContent = "إجابة خاطئة!";
+                feedbackElement.classList.add('incorrect');
+            }
+
+            quizContainer.appendChild(feedbackElement);
+
+            // الانتقال إلى السؤال التالي بعد تأخير قصير
+            setTimeout(() => {
+                currentQuestion++;
+
+                if (currentQuestion < questions.length) {
+                    showQuestion();
+                } else {
+                    showResult();
+                }
+            }, 1000); // تأخير لمدة 1 ثانية لعرض الرد
+        }
+
+        function showResult() {
+            const resultContainer = document.getElementById('result');
+            const scoreElement = document.getElementById('score');
+            const totalElement = document.getElementById('total');
+            const correctAnswersElement = document.getElementById('correctAnswers');
+            const incorrectAnswersElement = document.getElementById('incorrectAnswers');
+            
+            scoreElement.textContent = score;
+            totalElement.textContent = questions.length;
+            correctAnswersElement.textContent = correctAnswers;
+            incorrectAnswersElement.textContent = incorrectAnswers;
+
+            resultContainer.classList.remove('hidden');
+        }
+
+        function resetQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            correctAnswers = 0;
+            incorrectAnswers = 0;
+
+            document.getElementById('result').classList.add('hidden');
+            showQuestion();
+        }
+
+        // عرض السؤال الأول عند تحميل الصفحة
+        showQuestion();
+    </script>
+
+</body>
+
+</html>
